@@ -1,0 +1,620 @@
+% Copyright 2004 by Till Tantau <tantau@users.sourceforge.net>.
+%
+% In principle, this file can be redistributed and/or modified under
+% the terms of the GNU Public License, version 2.
+%
+% However, this file is supposed to be a template to be modified
+% for your own needs. For this reason, if you use this file as a
+% template and not specifically distribute it as part of a another
+% package/program, I grant the extra permission to freely copy and
+% modify this file as you see fit and even to delete this copyright
+% notice. 
+
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{graphicx}
+
+% There are many different themes available for Beamer. A comprehensive
+% list with examples is given here:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+% You can uncomment the themes below if you would like to use a different
+% one:
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{boxes}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+\title{Problem kolorowania grafów planarnych (map).}
+
+% A subtitle is optional and this may be deleted
+\subtitle{Historia Hipotezy o 4 barwach. Algorytm 6 i 5-kolorowania grafów planarnych.}
+
+\author{Paweł Troka}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute[Politechnika Gdańska] % (optional, but mostly needed)
+{
+  Informatyka\\
+  Katedra Algorytmów i Modelowania Systemów\\
+  Wydział Elektroniki, Telekomunikacji i Informatyki\\
+  Politechnika Gdańska
+}
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date{Wybrane problemy algorytmiczne i technologiczne, 2014}
+% - Either use conference name or its abbreviation.
+% - Not really informative to the audience, more for people (including
+%   yourself) who are reading the slides online
+
+\subject{Theoretical Computer Science}
+% This is only inserted into the PDF information catalog. Can be left
+% out. 
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+% Let's get started
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Spis treści}
+  \tableofcontents
+  % You might wish to add the option [pausesections]
+\end{frame}
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+\section{Problem kolorowania grafów planarnych}
+
+\subsection{O grafach.}
+
+
+\begin{frame}{Grafy}{Definicja}
+Graf – podstawowy obiekt rozważań teorii grafów, struktura matematyczna służąca do przedstawiania i badania relacji między obiektami. W uproszczeniu graf to zbiór wierzchołków, które mogą być połączone krawędziami w taki sposób, że każda krawędź kończy się i zaczyna w którymś z wierzchołków.\\
+  \includegraphics[scale=0.20]{graf1}
+\end{frame}
+
+\begin{frame}{Grafy}{Definicja (2)}
+Wierzchołki grafu mogą być numerowane i czasem stanowią reprezentację jakichś obiektów, natomiast krawędzie mogą wówczas obrazować relacje między takimi obiektami Wierzchołki należące do krawędzi nazywane są jej końcami. Krawędzie mogą mieć wyznaczony kierunek, a graf zawierający takie krawędzie nazywany jest grafem skierowanym lub orgrafem. Krawędź grafu może posiadać wagę, to znaczy przypisaną liczbę, która określa, na przykład, odległość między wierzchołkami (jeśli np. graf jest reprezentacją połączeń między miastami). W grafie skierowanym wagi mogą być zależne od kierunku przechodzenia przez krawędź (np. jeśli graf reprezentuje trud poruszania się po jakimś terenie, to droga pod górkę będzie miała przypisaną większą wagę niż z górki).\\
+Za pierwszego teoretyka i badacza grafów uważa się szwajcarskiego matematyka i fizyka Leonarda Eulera, który rozstrzygnął zagadnienie mostów królewieckich. Pierwsze użycie określenia „graf” przypisywane jest Jamesowi Josephowi Sylvesterowi – matematykowi angielskiego pochodzenia.\\
+\end{frame}
+
+\begin{frame}{Grafy planarne}
+  \begin{itemize}
+  \item {
+Graf planarny – graf, który można narysować na płaszczyźnie tak, by krzywe obrazujące krawędzie grafu nie przecinały się ze sobą. Odwzorowanie grafu planarnego na płaszczyznę o tej własności nazywane jest jego rysunkiem płaskim. Graf planarny o zbiorze wierzchołków i krawędzi zdefiniowanym poprzez rysunek płaski nazywany jest grafem płaskim.
+  }
+  \item {   
+Kryterium Kuratowskiego - Dwa minimalne grafy, które nie są planarne, to $K_5$ i $K_{3,3}$. Twierdzenie Kuratowskiego (1930) mówi, że graf skończony jest planarny wtedy i tylko wtedy, gdy nie zawiera podgrafu homeomorficznego z grafem $K_5$ ani z grafem $K_{3,3}$.
+  }
+
+
+
+  \end{itemize}
+  \includegraphics[scale=0.20]{sem1}
+\end{frame}
+
+\begin{frame}{Grafy planarne (2)}
+Wzór Eulera - Dowolny rysunek płaski grafu planarnego wyznacza spójne obszary płaszczyzny zwane ścianami. Dokładnie jeden z tych obszarów, zwany ścianą zewnętrzną, jest nieograniczony.
+Zgodnie z wzorem Eulera, jeżeli $|V| \geq 3$ oraz G jest grafem spójnym i planarnym, to $$|V|+|S|-|E|=2$$ gdzie V – zbiór wierzchołków, E – zbiór krawędzi, S – zbiór ścian dowolnego rysunku płaskiego grafu G.
+Wnioski ze wzoru Eulera:
+Jeżeli G jest planarny, to $$|E|\leq3\cdot|V|-6$$
+Jeżeli G jest planarny, to wierzchołek o najmniejszym stopniu jest stopnia co najwyżej 5.
+\end{frame}
+
+\begin{frame}{Grafy planarne a mapy}
+Równoważność tych dwóch sformułowań z punktu widzenia problemu kolorowania łatwo zauważyć wyróżniając w każdym kraju stolicę i prowadząc drogi pomiędzy stolicami każdych dwóch sąsiednich krajów. Przechodzimy wówczas z mapy politycznej do grafu planarnego. Analogicznie można przejść w przeciwną stronę.
+  \includegraphics[scale=0.20]{sem2}
+\end{frame}
+
+
+\subsection{O kolorowaniu grafów.}
+
+% You can reveal the parts of a slide one at a time
+% with the \pause command:
+\begin{frame}{Kolorowanie grafów}
+ Kolorowanie grafu polega w ogólności na przypisaniu określonym elementom składowym grafu (najczęściej wierzchołkom, rzadziej krawędziom lub ścianom) wybranych kolorów według ściśle określonych reguł. Klasyczne (czyli wierzchołkowe) kolorowanie grafu jest związane z przypisaniem wszystkim wierzchołkom w grafie jednej z wybranych barw w ten sposób, aby żadne dwa sąsiednie wierzchołki nie miały tego samego koloru. Innymi słowy, pewne pokolorowanie wierzchołkowe jest poprawne (legalne, dozwolone) wtedy, gdy końcom żadnej krawędzi nie przypisano tego samego koloru.
+   \includegraphics[scale=0.20]{sem3}
+\end{frame}
+
+\begin{frame}{Kolorowanie grafów (2)}
+ Klasyczne (wierzchołkowe) kolorowanie grafu - przyporządkowywanie wierzchołkom grafu liczb naturalnych w taki sposób, aby końce żadnej krawędzi nie miały przypisanej tej samej liczby. Ze względów historycznych oraz dla lepszego zobrazowania problemu mówi się o kolorowaniu, przy czym różnym kolorom odpowiadają różne liczby.\\
+Pokolorowaniem wierzchołków grafu nazywamy jedno konkretne przyporządkowanie kolorów wierzchołkom. Pokolorowanie jest legalne (dozwolone), gdy końcom żadnej krawędzi nie przyporządkowano tego samego koloru.\\
+Optymalnym pokolorowaniem danego grafu nazywamy legalne pokolorowanie zawierające najmniejszą możliwą liczbę kolorów.
+Liczbą chromatyczną grafu G nazywamy liczbę $\! \chi(G)$ równą najmniejszej możliwej liczbie kolorów potrzebnych do legalnego pokolorowania wierzchołków grafu G.
+\end{frame}
+
+
+\begin{frame}{Algorytmy kolorowania grafów}
+Ze względu na bardzo szerokie zastosowania, kolorowanie grafów jest przedmiotem rozległych badań. Problem znalezienia optymalnego pokolorowania, a także znalezienia liczby chromatycznej jest NP-trudny. Z tego względu do kolorowania dużych grafów nadają się jedynie algorytmy przybliżone
+\begin{itemize}
+\item {Algorytm LF (largest first)}
+\item {Algorytm SL (smallest last)}
+\item {Algorytm SLF (saturated largest first)}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kolorowanie grafów planarnych}
+The first results about graph coloring deal almost exclusively with planar graphs in the form of the coloring of maps. While trying to color a map of the counties of England, Francis Guthrie postulated the four color conjecture, noting that four colors were sufficient to color the map so that no regions sharing a common border received the same color. Guthrie’s brother passed on the question to his mathematics teacher Augustus de Morgan at University College, who mentioned it in a letter to William Hamilton in 1852. Arthur Cayley raised the problem at a meeting of the London Mathematical Society in 1879. The same year, Alfred Kempe published a paper that claimed to establish the result, and for a decade the four color problem was considered solved. For his accomplishment Kempe was elected a Fellow of the Royal Society and later President of the London Mathematical Society.
+\end{frame}
+
+
+\section{Ile kolorów jest potrzebnych aby pokolorować graf planarny?}
+\subsection{Co najwyżej $\Delta+1$ ?}
+
+
+\begin{frame}{Co najwyżej $\Delta+1$ ?}
+Tak!\\
+ \begin{block}{Twierdzenie}
+Dla dowolnego grafu o maksymalnym stopniu wierzchołka $\Delta$
+zachodzi oszacowanie $\chi(G)\leq \Delta + 1$.
+\end{block}
+\\
+Dowód - przeprowadzimy indukcję względem n:\\
+\begin{itemize}
+\item {Jeżeli n = 1, to nierówność oczywiście zachodzi.}
+\item {Zakładamy, że twierdzenie jest prawdziwe dla pewnego $n > 0$.}
+\item {Dowodzimy przypadek, gdy graf G ma n + 1 wierzchołków.}
+\end{itemize}
+
+Usuńmy z G dowolny wierzchołek v. Dla grafu G – v z założenia
+indukcyjnego mamy: $\chi(G-v)\leq \Delta + 1$. Wierzchołek v ma w grafie
+G co najwyżej $\Delta$ sąsiadów, więc jeden spośród $\Delta+1$ kolorów jest dla
+v dostępny, co pozwala uzyskać pokolorowanie G za pomocą co
+najwyżej $\Delta+1$ barw.
+
+\end{frame}
+
+\begin{frame}{A może mniej niż $\Delta+1$ ?}
+
+Istnieje twierdzenie:
+\begin{block}{Brooks, 1941}
+Istnieją dwie klasy grafów, dla których $\chi(G) = \Delta + 1$:
+grafy pełne oraz cykle o nieparzystej liczbie wierzchołków.
+\end{block}
+Czy więc można powiedzieć, że do pokolorowania każdego grafu planarnego wystarczy $\Delta$ kolorów?\\
+Nie, ponieważ istnieją grafy planarne które są grafami pełnymi.\\
+   \includegraphics[scale=0.20]{sem4}
+\end{frame}
+
+\subsection{Czy wystarczy 6 kolorów?}
+\begin{frame}{Czy wystarczy 6 kolorów?}
+Tak!\\
+ \begin{block}{Twierdzenie}
+Każdy graf planarny jest 6-barwny
+\end{block}
+
+Dowód - zastosujemy indukcję względem liczby wierzchołków grafu n:\\
+\begin{itemize}
+\item {Jeżeli n = 1, to twierdzenie jest oczywiście poprawne.}
+\item {Zakładamy, że własność zachodzi dla wszystkich (n-1)-wierzchołkowych grafów planarnych.}
+\item {Niech G będzie grafem planarnym o n wierzchołkach. Wiemy, że G
+posiada co najmniej jeden pąk v (wierzchołek o stopniu mniejszym lub
+równym 5) - ze wzoru Eulera. Po usunięciu v mamy (n – 1)-wierzchołkowy graf planarny
+G – v, do którego stosujemy założenie indukcyjne otrzymując jego 6-
+pokolorowanie. Wierzchołek v ma w G co najwyżej 5 sąsiadów, więc
+jeden z sześciu kolorów będzie dla v dostępny. Stąd G jest 6-barwny.}
+\end{itemize}
+\end{frame}
+
+\subsection{Czy wystarczy 5 kolorów?}
+
+
+\begin{frame}{Wystarczy 5}
+ \begin{block}{Heawood, 1890}
+Każdy graf planarny jest 5-barwny
+\end{block}
+
+Dowód - podobnie jak w poprzednim twierdzeniu, stosujemy indukcję
+względem n. Jeżeli wyznaczymy (z zał. ind.) 5-pokolorowanie G – v (gdzie v
+jest pąkiem) i wierzchołek v jest incydentny z co najwyżej 4 kolorami, to
+twierdzenie zachodzi. W przeciwnym wypadku rozważamy 2 sytuacje.
+\end{frame}
+
+\begin{frame}{Wystarczy 5 - przypadek szczególny 1}
+Przypadek 1:\\
+\begin{itemize}
+\item {Wierzchołki o kolorach czerwony, niebieski (sąsiedzi v) należą do różnych
+składowych grafu indukowanego przez wierzchołki o kolorach czerwony, niebieski (w całym grafie G – v)}
+\item {Wtedy zamieniamy kolory czerwony i niebieski w
+składowej zawierającej wierzchołek
+o kolorze czerwony (sąsiedni z v)}
+\item {v otrzymuje kolor czerwony}
+\end{itemize}
+  \includegraphics[scale=0.40]{5kol1}
+\end{frame}
+
+\begin{frame}{Wystarczy 5 - przypadek szczególny 2}
+Przypadek 2:\\
+\begin{itemize}
+\item {Wierzchołki o kolorach czerwony, niebieski
+(sąsiedzi v) wraz z v tworzą cykl w G}
+\item {Wtedy w składowej spójności
+zawierającej sąsiada v o kolorze zielonym
+możemy zamienić kolory zielony i fioletowy}
+\item {v otrzymuje kolor zielony}
+\end{itemize}
+  \includegraphics[scale=0.265]{5kol2}
+\end{frame}
+
+
+\subsection{Czy da się pokolorować czterema?}
+
+
+\begin{frame}{Czy da się pokolorować czterema?}
+Okazuję się, że się da.
+
+ \begin{block}{Wolfgang Haken i Kenneth Appel przy pomocy komputera, 1976}
+Graf planarny daje się zawsze pokolorować przy użyciu co najwyżej czterech kolorów.
+\end{block}
+
+Hipotezę o prawdziwości twierdzenia postawił już w roku 1840 August Ferdinand Möbius, a w roku 1852 (niezależnie) Francis Guthrie (1831–1899), wówczas student University College London, ale pełen dowód został przeprowadzony dopiero w 1976 roku przez Wolfganga Hakena i Kennetha Appela. Dowód wszakże był bardzo "brzydki", gdyż wymagał sprawdzenia 1936 przypadków szczególnych przy pomocy komputera.
+
+\end{frame}
+
+\section{Historia hipotezy o 4 barwach.}
+
+\subsection{Wczesne próby dowodu}
+\begin{frame}{Początki}
+Gdy w październiku 1852 roku Francis Guthrie (były
+student Augustusa de Morgana) kolorował mapę Anglii,
+zauważył, że cztery kolory wystarczą, by każde dwa
+sąsiadujące hrabstwa różniły się barwą. Pomyślał:\\
+
+Czy cztery barwy wystarczą do pokolorowania dowolnej,
+nawet najbardziej skomplikowanej mapy?\\
+
+Pytaniem zainteresowało się zrazu kilku matematyków,
+w tym de Morgan i Sir William Rowan Hamilton,
+a później także Arthur Cayley, lecz pierwszy "dowód"
+pojawił się dopiero w roku 1879. Przedstawił go
+Alfred Kempe, londyński prawnik, który studiował
+z Cayleyem w Cambridge, a później przez wiele lat
+piastował stanowisko skarbnika Royal Society. Był to
+zapewne najsłynniejszy fałszywy dowód w całej historii
+matematyki, choć kryło się w nim także kilka dobrych
+pomysłów.
+\end{frame}
+
+
+\begin{frame}{Dowód Alfreda Kempe}
+Zakładamy, że wszystkie kraje na mapie poza jednym
+pokolorowaliśmy już czterema barwami, po czym
+pokazujemy, jak rozszerzyć to kolorowanie na ostatni,
+brakujący kraj. Każdą mapę zawierającą co najwyżej
+4 kraje można oczywiście pokolorować czterema
+barwami zgodnie z regułami sąsiedztwa, zatem taka
+metoda pozwoliłaby rozszerzyć kolorowanie na 5, 6,
+7... krajów, czyli na wszystkie mapy. Otóż łatwo
+wywnioskować ze wzoru wielościennego Eulera, że
+na każdej mapie jest kraj, który ma co najwyżej pięciu
+sąsiadów: dwukąt (kraj o dwóch bokach), trójkąt,
+kwadrat lub pięciokąt. Kempe przeanalizował kolejno
+każdy z tych przypadków.
+  \includegraphics[scale=0.225]{sem6}
+\end{frame}
+
+\begin{frame}{Dowód Alfreda Kempe (2)}
+Jeśli mapa zawiera dwukąt lub trójkąt, ściągamy go do
+punktu. Mamy wtedy mniej krajów, potrafimy więc
+pokolorować je czterema barwami. Gdy przywrócimy
+oryginalną figurę, będzie ona otoczona co najwyżej
+trzema krajami. Pozostanie zatem wolny kolor, którym
+możemy pokolorować ów dwukąt lub trójkąt zgodnie
+z regułami.
+Jeśli na mapie znajduje się kwadrat, popatrzmy
+idąc tropem rozumowania Kempego na dwa tylko
+kolory, powiedzmy, na czerwony kraj bezpośrednio
+nad kwadratem i zielony kraj bezpośrednio pod
+kwadratem i rozważmy następujące pytanie: czy
+czerwono-zielona część mapy nad kwadratem jest
+połączona z czerwono-zieloną częścią mapy pod
+kwadratem?
+\end{frame}
+
+
+\begin{frame}{Dowód Alfreda Kempe (3)}
+Jeśli NIE (rysunek 2), to nad kwadratem możemy
+zamienić kolory czerwony i zielony (czerwone kraje stają
+się zielone i odwrotnie), w wyniku czego kraje leżące
+bezpośrednio nad i bezpośrednio pod kwadratem będą
+oba zielone - a wtedy możemy kwadrat pomalować
+na czerwono.
+
+  \includegraphics[scale=0.225]{sem8}
+\end{frame}
+
+\begin{frame}{Dowód Alfreda Kempe (4)}
+  \includegraphics[scale=0.225]{sem9}
+Jeśli jednak TAK (rysunek 3), to zamiana kolorów
+w niczym nie pomoże - kwadrat będzie wciąż otoczony
+czterema barwami. W takim przypadku popatrzmy
+na niebieski kraj leżący bezpośrednio na prawo
+i żółty kraj leżący bezpośrednio na lewo od kwadratu.
+Niebieskie i żółte terytoria po prawej są teraz oddzielone
+od takich samych terytoriów po lewej, gdyż rozdziela
+je pierścień czerwono-zielony. Możemy zatem po
+prawej stronie zamienić niebieski z żółtym bez szkody
+dla strony lewej, a następnie pokolorować kwadrat
+na niebiesko.
+\end{frame}
+
+
+\begin{frame}{Dowód Alfreda Kempe (5)}
+
+Wreszcie gdy mamy do czynienia z pięciokątem, Kempe
+proponuje podobne rozumowanie, wymagające jednak
+tym razem dwukrotnej zamiany kolorów, w wyniku
+której pięciokąt okaże się otoczony tylko trzema
+barwami, a czwarta zostanie dla niego. Tak kończy się
+dowód twierdzenia o czterech barwach.
+
+\end{frame}
+
+\begin{frame}{Obalenie dowodu Alfreda Kempe}
+
+Przez 11 lat rozumowanie Kempego było powszechnie
+akceptowane, m.in. przez Cayleya, więc bomba
+podrzucona przez Percy'ego Heawooda w 1890 roku
+wywołała nie lada efekt. Heawood wskazał na
+fundamentalny błąd w pracy Kempego, wykazując, że
+nie zawsze można wykonać dwukrotną zamianę kolorów
+w przypadku pięciokąta. Udało mu się jednak uratować
+część rozumowania, wystarczającą do udowodnienia,
+że każdą mapę można pokolorować pięcioma barwami
+wynik wciąż jeszcze imponujący.
+
+\end{frame}
+
+
+\begin{frame}{Spuścizna Kempe (1)}
+
+Tymczasem praca nad problemem czterech barw
+dawała efekty dość mierne. Choć trudno było naprawić
+błąd Kempego, można było jednak wydobyć z jego
+artykułu dwa pomysły, które miały okazać się przydatne
+w ostatecznym rozwiązaniu.\\
+Pierwszy z nich to pojęcie \alert{nieuniknionego zbioru
+konfiguracji}. Jak stwierdziliśmy wyżej, każda mapa
+zawiera figurę, która jest co najwyżej pięciokątem,
+zatem wymienione przy tej okazji konfiguracje (dwukąt,
+trójkąt, kwadrat, pięciokąt) stanowią przykład
+nieuniknionego zbioru: w każdej mapie jedna z nich
+musi wystąpić, nie można ich uniknąć.
+
+\end{frame}
+
+\begin{frame}{Spuścizna Kempe (2)}
+Z pierwszymi trzema umiemy sobie poradzić, trudność sprawia
+jedynie pięciokąt spróbujmy więc zastąpić go czymś
+innym. Można wykazać, że każda mapa niezawierająca
+dwukąta, trójkąta ani kwadratu, zawiera nie tylko
+pięciokąt, ale również albo dwa sąsiadujące pięciokąty,
+albo pięciokąt sąsiadujący z sześciokątem. Mamy zatem
+nowy nieunikniony zbiór: dwukąt, trójkąt, kwadrat,
+dwa sąsiadujące pięciokąty, pięciokąt sąsiadujący
+z sześciokątem.
+Widzieliśmy też, że dwukąt, trójkąt lub kwadrat
+jest \alert{konfiguracją redukowalną}, co oznacza, że każde
+kolorowanie pozostałej części mapy czterema barwami
+można rozszerzyć tak, by objęło ono i tę konfigurację
+czego nie umiemy zrobić z pięciokątem.
+
+\end{frame}
+
+\begin{frame}{Spuścizna Kempe (3)}
+Widać zatem, że w celu udowodnienia, że cztery barwy
+wystarczą do pokolorowania każdej mapy, należy
+znaleźć nieunikniony zbiór konfiguracji redukowalnych,
+a więc taki zbiór konfiguracji, że każda mapa zawiera
+co najmniej jedną z nich i ta, którą zawiera, jest
+redukowalna.\\
+Przez pierwsze dwie trzecie XX wieku poszukiwano
+albo nieuniknionych zbiorów konfiguracji, albo
+konfiguracji redukowalnych. Pierwszym, który połączył
+te dwa pojęcia, był niemiecki matematyk Herman
+Heesch. Spędził on 40 lat na poszukiwaniach właśnie
+nieuniknionego zbioru redukowalnych konfiguracji.
+\end{frame}
+
+
+\subsection{Dowód przy pomocy komputera}
+\begin{frame}{Dowód przy pomocy komputera}
+ Wreszcie w 1976 roku pomysł Heescha został
+zrealizowany przez dwóch matematyków z Uniwersytetu
+stanu Illinois, Kennetha Apple'a i Wolfganga Hakena,
+wspomaganych w sprawach komputerowych przez
+studenta Johna Kocha. Po czterech latach poszukiwań
+z użyciem najpotężniejszych komputerów owego czasu
+znaleźli oni nieunikniony zbiór 1936 redukowalnych
+konfiguracji; po pewnym czasie udało im się go
+zmniejszyć do 1482 redukowalnych konfiguracji,
+a uzyskane rozwiązanie opublikowali w 1977 roku
+
+\end{frame}
+
+\begin{frame}{Filozoficzne następstwa dowodu przy użyciu komputera}
+Dowód wspomagany obliczeniami komputerowymi
+budził wówczas dużą podejrzliwość i rodził wiele
+filozoficznych pytań. Czy można uznać za poprawny
+dowód, którego nie możemy sprawdzić ręcznie, nawet
+jeśli udział komputera sprowadzał się do rutynowego
+zweryfikowania przypadków? Ale czy rzeczywiście
+powinniśmy pokładać wiarę w ręczny, ale niezmiernie
+długi dowód, powiedzmy, twierdzenia Feita-Thompsona
+o grupach rozwiązalnych, albo w dowód Wilesa dla
+Wielkiego Twierdzenia Fermata, gdzie możliwość
+ludzkiego błędu jest ogromna?
+\end{frame}
+
+
+
+
+\subsection{Dopracowanie i weryfikacja}
+\begin{frame}{Dopracowanie i weryfikacja}
+ W latach 90. XX wieku czterech matematyków: Neil
+Robertson, Dan Sanders, Paul Seymour i Robin
+Thomas, przedstawiło bardziej strukturalny dowód
+twierdzenia o czterech barwach. Zastosowali oni
+podobne komputerowo wspomagane podejście co
+Apple i Haken, ale objęło ono tylko 600 redukowalnych
+konfiguracji, które można sprawdzić na laptopie
+w ciągu kilku godzin. Większość matematyków chętnie
+przyjmuje ten dowód, nawet jeśli mieli wątpliwości
+wobec dowodu Apple'a-Hakena. Nie mamy jednak, jak
+dotąd, żadnego dowodu, który obywałby się całkowicie
+bez komputera.
+\end{frame}
+
+\begin{frame}{Współczeność}
+Since the proving of the theorem, efficient algorithms have been found for 4-coloring maps requiring only $O(n^2)$ time, where n is the number of vertices.\\
+
+In 2005, Benjamin Werner and Georges Gonthier formalized a proof of the theorem inside the Coq proof assistant. This removed the need to trust the various computer programs used to verify particular cases; it is only necessary to trust the Coq kernel (Gonthier 2008).
+\end{frame}
+
+
+% Placing a * after \section means it will not show in the
+% outline or table of contents.
+\section*{Podsumowanie}
+
+\begin{frame}{Podsumowanie}
+  \begin{itemize}
+  \item
+    Każdy graf \alert{planarny} daje się zawsze pokolorować przy użyciu co najwyżej \alert{czterech} kolorów.
+  \item
+    Istnieją efektywne algorytmy kolorujące grafy \alert{planarne} w czasie \alert{$O(n^2)$}.
+  \end{itemize}
+ Wynik typu TWIERDZENIE:\\
+ \begin{block}{Twierdzenie o czterech barwach}
+Graf planarny daje się zawsze pokolorować przy użyciu co najwyżej czterech kolorów.
+\end{block}
+\end{frame}
+
+
+
+% All of the following is optional and typically not needed. 
+\appendix
+\section<presentation>*{\appendixname}
+\subsection<presentation>*{Bibliografia}
+
+\begin{frame}[allowframebreaks]
+  \frametitle<presentation>{Bibliografia}
+    
+  \begin{thebibliography}{10}
+    
+    
+  \beamertemplatearticlebibitems
+  % Followed by interesting articles. Keep the list short. 
+
+
+  \bibitem{Someone2000}
+    \url{http://pl.wikipedia.org/wiki/Graf_planarny}
+    \newblock {\em dostep:} 21.10.2014.
+
+  \bibitem{Someone2000}
+    \url{http://en.wikipedia.org/wiki/Planar_graph}
+    \newblock {\em dostep:} 21.10.2014.
+
+  \bibitem{Someone2000}
+    \url{http://pl.wikipedia.org/wiki/Kolorowanie_grafu}
+    \newblock {\em dostep:} 21.10.2014.
+    
+      \bibitem{Someone2000}
+    \url{http://en.wikipedia.org/wiki/Graph_coloring}
+    \newblock {\em dostep:} 21.10.2014.
+
+  \bibitem{Someone2000}
+    \url{http://pl.wikipedia.org/wiki/Twierdzenie_o_czterech_barwach}
+    \newblock {\em dostep:} 21.10.2014.
+    
+      \bibitem{Someone2000}
+    \url{http://en.wikipedia.org/wiki/Four_color_theorem}
+    \newblock {\em dostep:} 21.10.2014.
+    
+      \bibitem{Someone2000}
+    \url{http://akademia.mini.pw.edu.pl/kolorowanie_map.pdf}
+    \newblock {\em dostep:} 21.10.2014.
+
+      \bibitem{Someone2000}
+    \url{http://mimuw.edu.pl/delta/artykuly/delta0604/4barwy.pdf}
+    \newblock {\em dostep:} 21.10.2014.
+
+      \bibitem{Someone2000}
+    \url{http://www.deltami.edu.pl/temat/matematyka/teoria_grafow/2011/04/21/O_dwoch_takich_co_kolorowali_mape}
+    \newblock {\em dostep:} 21.10.2014.
+  
+      \bibitem{Someone2000}
+    \url{http://www.wiw.pl/delta/cztery_barwy.asp}
+    \newblock {\em dostep:} 21.10.2014. 
+  
+  
+      \bibitem{Someone2000}
+    \url{http://www.uz.zgora.pl/~tbartnic/pliki/BartnickiDR.pdf}
+    \newblock {\em dostep:} 21.10.2014.
+
+      \bibitem{Someone2000}
+    \url{http://kaims.pl/~deren/ag/wyklady/14_kolorowanie.pdf}
+    \newblock {\em dostep:} 21.10.2014.
+ 
+      \bibitem{Someone2000}
+    \url{http://pl.wikipedia.org/wiki/Graf_(matematyka)}
+    \newblock {\em dostep:} 22.10.2014.
+    
+          \bibitem{Someone2000}
+    \url{http://en.wikipedia.org/wiki/Graph_(mathematics)}
+    \newblock {\em dostep:} 22.10.2014.
+ 
+ 
+ 
+ 
+ 
+  \end{thebibliography}
+\end{frame}
+
+\end{document}
+
+
